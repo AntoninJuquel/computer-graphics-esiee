@@ -63,8 +63,8 @@ THE SOFTWARE.
 #include <map>
 #include <string>
 #include <vector>
-#include <iostream>
-
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "VBO.h"
 
 namespace tinyobj {
@@ -459,7 +459,9 @@ namespace tinyobj {
             object_cb(NULL) {}
     };
 
-    void fillMatrices(std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& indices);
+    // Modif Début : Pour tiny_obj_loader.cpp
+    std::pair<std::vector<Vertex>, std::vector<GLuint>> loadOBJ(const std::string& filename);
+    // Modif Fin
 
     class MaterialReader {
     public:
@@ -2566,7 +2568,10 @@ namespace tinyobj {
         return true;
     }
 
-    void fillMatrices(std::vector<Vertex>& vertices, std::vector<GLuint>& indices) {}
+    std::pair<std::vector<Vertex>, std::vector<GLuint>> loadOBJ(const std::string& filename)
+    {
+        return std::pair<std::vector<Vertex>, std::vector<GLuint>>();
+    }
 
     bool LoadObj(attrib_t* attrib, std::vector<shape_t>* shapes,
         std::vector<material_t>* materials, std::string* warn,

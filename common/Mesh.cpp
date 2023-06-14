@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector <glm::vec3>& vertices, std::vector <glm::vec3>& indices, std::vector <Texture>& textures)
+Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures)
 {
 	Mesh::vertices = vertices;
 	Mesh::indices = indices;

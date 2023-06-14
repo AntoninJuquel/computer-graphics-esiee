@@ -1,41 +1,61 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
+#include <iostream>
+#include "VBO.h"
+#include <glm/glm.hpp>
 
-void fillMatrices(std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& indices) {
-    std::string inputfile = "Arwing.obj";
-    tinyobj::ObjReaderConfig reader_config;
-    reader_config.mtl_search_path = "./"; // Path to material files
+std::pair<std::vector<Vertex>, std::vector<GLuint>> loadOBJ(const std::string& filename) {
+    std::vector<Vertex> vertices;
+    std::vector<GLuint> indices;
 
+    tinyobj::ObjReaderConfig readerConfig;
     tinyobj::ObjReader reader;
 
-    if (!reader.ParseFromFile(inputfile, reader_config)) {
+    if (!reader.ParseFromFile(filename, readerConfig)) {
         if (!reader.Error().empty()) {
-            std::cerr << "TinyObjReader: " << reader.Error();
+            std::cerr << "Failed to load OBJ file: " << reader.Error() << std::endl;
         }
-        exit(1);
+        return { vertices, indices };
     }
 
     if (!reader.Warning().empty()) {
-        std::cout << "TinyObjReader: " << reader.Warning();
+        std::cout << "Warning loading OBJ file: " << reader.Warning() << std::endl;
     }
 
-    auto& attrib = reader.GetAttrib();
-    auto& shapes = reader.GetShapes();
-    auto& materials = reader.GetMaterials();
+    const tinyobj::attrib_t& attrib = reader.GetAttrib();
+    const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
 
-    // Loop over vertices
-    for (size_t vec_start = 0; vec_start < attrib.vertices.size(); vec_start += 3) {
-        vertices.emplace_back(
-            attrib.vertices[vec_start],
-            attrib.vertices[vec_start + 1],
-            attrib.vertices[vec_start + 2]);
+    for (const auto& shape : shapes) {
+        const auto& mesh = shape.mesh;
+
+        for (size_t i = 0; i < mesh.indices.size(); i++) {
+            const tinyobj::index_t& index = mesh.indices[i];
+
+            Vertex vertex;
+            vertex.position = glm::vec3(
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2]
+            );
+            vertex.normal = glm::vec3(
+                attrib.normals[3 * index.normal_index + 0],
+                attrib.normals[3 * index.normal_index + 1],
+                attrib.normals[3 * index.normal_index + 2]
+            );
+            vertex.color = glm::vec3(
+                attrib.colors[3 * index.vertex_index + 0],
+                attrib.colors[3 * index.vertex_index + 1],
+                attrib.colors[3 * index.vertex_index + 2]
+            );
+            vertex.texUV = glm::vec2(
+                attrib.texcoords[2 * index.texcoord_index + 0],
+                attrib.texcoords[2 * index.texcoord_index + 1]
+            );
+
+            vertices.push_back(vertex);
+            indices.push_back(static_cast<GLuint>(indices.size()));
+        }
     }
 
-    // Loop over normals
-    for (size_t norm_start = 0; norm_start < attrib.normals.size(); norm_start += 3) {
-        indices.emplace_back(
-            attrib.normals[norm_start],
-            attrib.normals[norm_start + 1],
-            attrib.normals[norm_start + 2]);
-    }
+    return { vertices, indices };
 }

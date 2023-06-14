@@ -14,22 +14,29 @@ extern "C" {
 }
 
 #include "../common/Mesh.h"
+#include "../common/tiny_obj_loader.h"
 
-// Vertices coordinates
-Vertex vertices[] =
-{ //               COORDINATES           /            COLORS          /           NORMALS         /       TEXTURE COORDINATES    //
-	Vertex{glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
-	Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
-	Vertex{glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
-	Vertex{glm::vec3(1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)}
-};
+// Vertices coordinates (deprecated)
+//Vertex vertices[] =
+//{ //               COORDINATES           /            COLORS          /           NORMALS         /       TEXTURE COORDINATES    //
+//	Vertex{glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
+//	Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
+//	Vertex{glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
+//	Vertex{glm::vec3(1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)}
+//};
 
-// Indices for vertices order
-GLuint indices[] =
-{
-	0, 1, 2,
-	0, 2, 3
-};
+// Vertices coordinates (tiny_obj_loader)
+std::vector<glm::vec3> vertices;
+
+// Indices for vertices order (deprecated)
+//GLuint indices[] =
+//{
+//	0, 1, 2,
+//	0, 2, 3
+//};
+
+// Indices for vertices order (tiny_obj_loader)
+std::vector<glm::vec3> indices;
 
 const unsigned int width = 500;
 const unsigned int height = 500;
@@ -87,12 +94,12 @@ int main() {
 	shaderProgram.LoadVertexShader("default.vs.glsl");
 	shaderProgram.LoadFragmentShader("default.fs.glsl");
 	shaderProgram.Create();
+	// Generates vertices and indices with tiny_obj_loader
+	tinyobj::fillMatrices(vertices, indices);
 	// Store mesh data in vectors for the mesh
-	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
-	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 	// Create floor mesh
-	Mesh floor(verts, ind, tex);
+	Mesh floor(vertices, indices, tex);
 	glm::vec3 floorPos = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::mat4 floorModel = glm::mat4(1.0f);
 	glUseProgram(shaderProgram.GetProgram());
